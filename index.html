@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Craig Jones Invitational - Bracket Predictions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .bracket-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 40px;
+        }
+        .bracket {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+        }
+        .round {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .round-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .match {
+            display: flex;
+            flex-direction: column;
+            margin: 10px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .player {
+            padding: 10px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .player:first-child {
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+        }
+        .player:last-child {
+            border-radius: 0 0 5px 5px;
+        }
+        .winner {
+            background-color: #e6ffe6;
+        }
+        .final {
+            align-self: center;
+        }
+        .instructions {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Craig Jones Invitational - Bracket Predictions</h1>
+
+    <p class="instructions">
+        Select your predictions by clicking on the players you think will win each match. Once you're done, take a screenshot of your predictions to share with your friends and show them you know your stuff!<br><br>Brought to you by @badhombre.10p!
+    </p>
+
+    <div class="bracket-container">
+        <!-- -80kg Division Bracket -->
+        <div class="bracket" id="bracket-80kg">
+            <h2>-80kg Division</h2>
+        </div>
+
+        <!-- +80kg Division Bracket -->
+        <div class="bracket" id="bracket-80kg-plus">
+            <h2>+80kg Division</h2>
+        </div>
+    </div>
+
+    <script>
+        const players80kg = [
+            "Tye Ruotolo", "Jason Nolf", "Roberto Jimenez", "Levi Jones-Leary",
+            "Lucas Barbosa", "Kenta Iwamoto", "Andy Varela", "Jozef Chen",
+            "Kade Ruotolo", "Matheus Diniz", "Renato Canuto", "Tommy Langaker",
+            "Magid Hage", "Eoghan O'Flanagan", "Andrew Tackett", "Nicky Ryan"
+        ];
+
+        const players80kgPlus = [
+            "Nicky Rod", "Max Gimeney", "Owen Livesey", "Mahamed Aly",
+            "Adam Bradley", "Kyle Boehm", "Pat Downey", "Luke Rockhold",
+            "Victor Hugo", "Lucas Kanard", "Inacio Santos", "Pedro Alex",
+            "Daniel Kerkvliet", "Fellipe Andrew", "Joao Gabriel Rocha", "William Tackett"
+        ];
+
+        function createBracket(players, bracketId) {
+            const bracket = document.getElementById(bracketId);
+            const roundNames = ["Quarterfinals", "Semifinals", "Final"];
+            const rounds = 4; // Number of rounds (including the final)
+
+            for (let i = 0; i < rounds; i++) {
+                const round = document.createElement('div');
+                round.className = 'round';
+                if (i < roundNames.length) {
+                    const roundTitle = document.createElement('div');
+                    roundTitle.className = 'round-title';
+                    roundTitle.textContent = roundNames[i];
+                    round.appendChild(roundTitle);
+                }
+                const matchesInRound = 8 / Math.pow(2, i);
+
+                for (let j = 0; j < matchesInRound; j++) {
+                    const match = document.createElement('div');
+                    match.className = 'match';
+                    if (i === rounds - 1) match.classList.add('final');
+
+                    if (i === 0) {
+                        // First round
+                        const player1 = document.createElement('div');
+                        player1.className = 'player';
+                        player1.textContent = players[j * 2];
+                        player1.onclick = () => advancePlayer(player1, match, bracketId);
+
+                        const player2 = document.createElement('div');
+                        player2.className = 'player';
+                        player2.textContent = players[j * 2 + 1];
+                        player2.onclick = () => advancePlayer(player2, match, bracketId);
+
+                        match.appendChild(player1);
+                        match.appendChild(player2);
+                    } else {
+                        // Subsequent rounds
+                        for (let k = 0; k < 2; k++) {
+                            const player = document.createElement('div');
+                            player.className = 'player';
+                            player.textContent = 'TBD';
+                            player.onclick = () => advancePlayer(player, match, bracketId);
+                            match.appendChild(player);
+                        }
+                    }
+
+                    round.appendChild(match);
+                }
+
+                bracket.appendChild(round);
+            }
+        }
+
+        function advancePlayer(player, match, bracketId) {
+            // Remove winner class from all players in this match
+            match.querySelectorAll('.player').forEach(p => p.classList.remove('winner'));
+
+            // Add winner class to clicked player
+            player.classList.add('winner');
+
+            // Find the next match
+            const nextRound = match.parentElement.nextElementSibling;
+            if (nextRound) {
+                const currentRoundMatches = Array.from(match.parentElement.children).filter(el => el.classList.contains('match'));
+                const matchIndex = currentRoundMatches.indexOf(match);
+                const nextMatch = nextRound.querySelectorAll('.match')[Math.floor(matchIndex / 2)];
+                if (nextMatch) {
+                    const nextPlayer = nextMatch.children[matchIndex % 2];
+
+                    // Update the next match with the winner
+                    nextPlayer.textContent = player.textContent;
+                    nextPlayer.classList.remove('winner');
+                }
+            }
+        }
+
+        // Initialize both brackets
+        createBracket(players80kg, 'bracket-80kg');
+        createBracket(players80kgPlus, 'bracket-80kg-plus');
+    </script>
+</body>
+</html>
